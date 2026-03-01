@@ -36,6 +36,13 @@ export function buildCaptureHandler(
 			return
 		}
 
+		// Fallback for OpenClaw versions where messageProvider is undefined
+		const cronSessionKey = getSessionKey()
+		if (cronSessionKey && /^cron:|:cron:|:isolated:/.test(cronSessionKey)) {
+			log.info("skipping capture for cron/isolated session: " + cronSessionKey)
+			return
+		}
+
 		if (
 			!event.success ||
 			!Array.isArray(event.messages) ||
