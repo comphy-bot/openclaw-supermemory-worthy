@@ -50,6 +50,21 @@ export function buildCaptureHandler(
 		)
 			return
 
+		// Skip no-op sentinel replies (cron results injected into main session)
+		const lastMsg = event.messages[event.messages.length - 1]
+		if (lastMsg && typeof lastMsg === "object") {
+			const lm = lastMsg as Record<string, unknown>
+			const lc = lm.content
+			const lastText = typeof lc === "string" ? lc.trim()
+				: Array.isArray(lc) ? (lc as Array<Record<string, unknown>>)
+					.filter(b => b.type === "text").map(b => String(b.text)).join("").trim()
+				: ""
+			if (lastText === "NO_REPLY" || lastText === "HEARTBEAT_OK") {
+				log.info("skipping capture: no-op sentinel (" + lastText + ")")
+				return
+			}
+		}
+
 		const lastTurn = getLastTurn(event.messages)
 
 		const texts: string[] = []
