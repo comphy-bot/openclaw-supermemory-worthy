@@ -164,3 +164,28 @@ git fetch upstream
 git merge upstream/main
 # Resolve any conflicts in our 3 changed files, commit, push
 ```
+
+## Deployment Note (2026-03-01)
+
+**Symlinks don't work.** OpenClaw's extension directory scan skips symlink entries.
+
+Instead, add the fork path to `plugins.load.paths` in `~/.openclaw/openclaw.json`:
+
+```json
+"plugins": {
+  "load": {
+    "paths": ["/Users/vatsal/.openclaw/workspace/clones-repos/openclaw-supermemory-worthy"]
+  }
+}
+```
+
+Then restart: `openclaw gateway stop && sleep 2 && openclaw gateway start`
+
+The symlink-based deployment steps in the original SDP are superseded by this approach.
+The backup npm install remains at `~/.openclaw/extensions/openclaw-supermemory.backup-npm`.
+
+### Verified Working (2026-03-01 16:05 GMT)
+- Plugin loads cleanly (no parse errors)
+- Real conversations: `provider="telegram"` → captured normally
+- Cron jobs: `provider="undefined"` → sessionKey fallback → `skipping capture for cron/isolated session: agent:main:cron:...`
+- Both guards confirmed working
